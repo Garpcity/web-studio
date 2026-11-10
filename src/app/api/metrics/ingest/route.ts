@@ -54,6 +54,36 @@ export async function POST(req: Request) {
       },
     });
     written++;
+    // Feil fra frontend blir varsel, ikke bare en rad i en tabell. Ett åpent varsel per nettside.
+    if (m.metric === "server_error" || m.metric === "cms_fallback") {
+      const title =
+        m.metric === "server_error"
+          ? "Serverfeil i frontend"
+          : "CMS utilgjengelig (fallback brukt)";
+      const open = await payload.find({
+        collection: "alerts",
+        where: {
+          and: [
+            { site: { equals: site.docs[0].id } },
+            { resolved: { equals: false } },
+            { title: { equals: title } },
+          ],
+        },
+        limit: 1,
+      });
+      const detail = (m.detail ?? {}) as { message?: string; path?: string };
+      if (!open.docs[0]) {
+        await payload.create({
+          collection: "alerts",
+          data: {
+            title,
+            site: site.docs[0].id,
+            severity: m.metric === "server_error" ? "critical" : "warning",
+            message: `${detail.path ?? ""} ${detail.message ?? ""}`.trim(),
+          },
+        });
+      }
+    }
   }
   return NextResponse.json({ ok: true, written });
 }

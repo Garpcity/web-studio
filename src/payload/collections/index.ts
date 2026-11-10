@@ -343,6 +343,8 @@ export const Metrics: CollectionConfig = {
         "form_submissions",
         "ai_pr_autoapproved_rate",
         "hours_to_launch",
+        "server_error",
+        "cms_fallback",
       ].map((v) => ({ label: v, value: v })),
     },
     { name: "value", type: "number", required: true },
