@@ -4,11 +4,21 @@ import config from "@payload-config";
 
 /** Seed i utvikling: POST /api/seed med x-payload-secret. Lager owner-bruker, AD.Moment og pilotsiden. */
 export async function POST(req: Request) {
-  if (process.env.NODE_ENV === "production" && process.env.ALLOW_SEED !== "true")
-    return NextResponse.json({ error: "Ikke i produksjon" }, { status: 403 });
   if (req.headers.get("x-payload-secret") !== process.env.PAYLOAD_SECRET)
     return NextResponse.json({ error: "Ikke autorisert" }, { status: 401 });
   const payload = await getPayload({ config });
+  // I produksjon bare når databasen er tom (første oppstart) eller ALLOW_SEED=true.
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_SEED !== "true") {
+    const users = await payload.count({ collection: "users" });
+    if (users.totalDocs > 0)
+      return NextResponse.json(
+        {
+          error:
+            "Databasen har allerede innhold. Sett ALLOW_SEED=true for å seede på nytt.",
+        },
+        { status: 403 },
+      );
+  }
 
   const users = await payload.find({ collection: "users", limit: 1 });
   if (users.totalDocs === 0) {

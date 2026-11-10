@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { buildConfig } from "payload";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { sqliteAdapter } from "@payloadcms/db-sqlite";
+import { ensureSchema } from "./payload/ensure-schema";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import sharp from "sharp";
 import { collections } from "./payload/collections";
@@ -19,6 +20,7 @@ const db = databaseUrl.startsWith("postgres")
   : sqliteAdapter({ client: { url: databaseUrl || "file:./studio.db" }, push: true });
 
 export default buildConfig({
+  onInit: ensureSchema,
   secret: process.env.PAYLOAD_SECRET ?? "dev-only-secret-change-me",
   serverURL: process.env.STUDIO_URL ?? "http://localhost:3100",
   admin: {

@@ -10,8 +10,8 @@ RUN pnpm install --frozen-lockfile
 
 FROM base AS build
 ENV NEXT_TELEMETRY_DISABLED=1
-# Payload trenger en secret og en database for å laste config under bygg; prod-verdier settes ved kjøring.
-ENV PAYLOAD_SECRET=build-only-secret DATABASE_URL=file:./build.db STUDIO_URL=http://localhost:3100
+# Payload trenger secret og database under bygg (prerender). PAYLOAD_DB_PUSH=true lager tabellene i build.db.
+ENV PAYLOAD_SECRET=build-only-secret DATABASE_URL=file:./build.db PAYLOAD_DB_PUSH=true STUDIO_URL=http://localhost:3100
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN pnpm build
