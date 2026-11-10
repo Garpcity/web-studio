@@ -35,6 +35,7 @@ Produksjon: `DATABASE_URL=postgres://…` bytter til Postgres automatisk. Kjør 
 | `GET /api/tasks/:id/run` | synkroniserer status (PR funnet → review) |
 | `POST /api/health/run` | sjekker alle miljøer, skriver uptime/response_ms, lager varsel ved nedetid. Kall fra n8n/cron hvert 5. min |
 | `POST /api/metrics/ingest` | n8n skriver målinger: `{ siteSlug, source, metrics:[{metric,value,period?,detail?}] }` |
+| `GET/POST /api/sites/:slug/visibility` | n8n henter kjernespørsmål; leverer måling → `ai_cited_rate` + automatiske `content`-oppgaver per spørsmål uten sitering |
 | `POST /api/seed` | seed (krever `x-payload-secret`) |
 | `/api/mcp` | Studios MCP (`x-studio-key: $STUDIO_MCP_KEY`): `get_status`, `create_site`, `create_task`, `run_task`, `list_alerts` |
 
