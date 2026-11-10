@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    name: Typer, tester, build
+    runs-on: ubuntu-latest
+    env:
+      PAYLOAD_SECRET: ci-secret-0123456789abcdef
+      DATABASE_URL: file:./studio.db
+      STUDIO_API_KEY: ci-key
+      STUDIO_MCP_KEY: ci-mcp-key
+      GITHUB_ORG: Garpcity
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - name: Start dev for skjema-push, seed, røyk-test
+        run: |
+          (pnpm next dev -p 3100 > dev.log 2>&1 &)
+          for i in $(seq 1 60); do sleep 2; curl -sf -o /dev/null http://localhost:3100/admin && break; done
+          curl -sf -X POST localhost:3100/api/seed -H "x-payload-secret: $PAYLOAD_SECRET"
+          curl -sf -X POST localhost:3100/api/health/run -H "x-studio-key: $STUDIO_API_KEY" | grep -q '"ok":true'
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST localhost:3100/api/metrics/ingest)" = "401"
+          pkill -f "next dev" || true
+      - run: pnpm build

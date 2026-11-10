@@ -7,10 +7,17 @@ import { createStudioMcp } from "@/mcp/server";
 export const dynamic = "force-dynamic";
 
 async function handle(req: Request) {
-  if (!hasKey(req, "STUDIO_MCP_KEY")) return Response.json({ error: "Ikke autorisert" }, { status: 401 });
+  if (!hasKey(req, "STUDIO_MCP_KEY"))
+    return Response.json({ error: "Ikke autorisert" }, { status: 401 });
   const payload = await getPayload({ config });
-  const server = createStudioMcp(payload, process.env.STUDIO_URL ?? "http://localhost:3100", process.env.STUDIO_API_KEY ?? "");
-  const transport = new WebStandardStreamableHTTPServerTransport({ enableJsonResponse: true });
+  const server = createStudioMcp(
+    payload,
+    process.env.STUDIO_URL ?? "http://localhost:3100",
+    process.env.STUDIO_API_KEY ?? "",
+  );
+  const transport = new WebStandardStreamableHTTPServerTransport({
+    enableJsonResponse: true,
+  });
   await server.connect(transport);
   try {
     return await transport.handleRequest(req);
