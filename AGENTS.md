@@ -1,9 +1,23 @@
-<!-- BEGIN:nextjs-agent-rules -->
+# AGENTS.md – Web Studio
 
-## This is NOT the Next.js you know
+Dette er kontrollrommet for nettsider bygget på `web-standard-template`. Les README.md for datamodell og endepunkter.
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+## Regler
 
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+- Språk i UI, feltnavn (labels) og kommentarer: norsk bokmål. Kode og identifikatorer: engelsk.
+- Payload-samlingene i `src/payload/collections/index.ts` er sannheten for datamodellen. Endre der, aldri i generert `payload-types.ts`.
+- Tilgang: `isOwner` / `isStaff` / `staffOrOwnCustomer`. En kunde skal aldri se andre kunders data. Test det når du endrer access.
+- Integrasjoner i `src/integrations/` er rene funksjoner med injiserbar `fetch` så de kan testes uten nett. GitHub-adapteret bruker bare REST, ingen SDK.
+- Interne endepunkter beskyttes med `hasKey(req, "STUDIO_API_KEY")`. Ingen åpne skrive-endepunkter.
+- Ingen eksterne CDN-er eller fonter. Alt selvhostet.
+- Kjør `pnpm check` før commit. Nye integrasjoner får tester i `tests/`.
+- Ikke bygg innholdsredigering i Studio. Det bor i nettsidens CMS/Puck.
+- n8n eier dataflyt (Search Console, CrUX, AI-synlighet). Studio mottar via `/api/metrics/ingest`.
 
-<!-- END:nextjs-agent-rules -->
+## Kommandoer
+
+```bash
+pnpm dev            # port 3100
+pnpm check          # typecheck + vitest
+pnpm build
+```
