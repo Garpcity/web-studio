@@ -2,7 +2,5 @@
   "semi": true,
   "singleQuote": false,
   "trailingComma": "all",
-  "printWidth": 90,
-
-  "tailwindStylesheet": "./src/app/globals.css"
+  "printWidth": 90
 }
